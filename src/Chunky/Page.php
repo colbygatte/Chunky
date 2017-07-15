@@ -10,10 +10,14 @@ class Chunks
     protected $chunkyDirectory;
     
     /**
-     * @var \ColbyGatte\Chunky\Chunk[]
+     * @var \ColbyGatte\Chunky\Entry[]
      */
     protected $chunks = [];
     
+    /**
+     * Timestamp of the
+     * @var int
+     */
     protected $timestamp;
     
     /**
@@ -43,7 +47,7 @@ class Chunks
      *
      * @param $chunk
      *
-     * @return bool|\ColbyGatte\Chunky\Chunk
+     * @return bool|\ColbyGatte\Chunky\Entry
      */
     public function searchForChunk($chunk)
     {
@@ -104,7 +108,7 @@ class Chunks
     /**
      * @param $data
      *
-     * @return \ColbyGatte\Chunky\Chunk
+     * @return \ColbyGatte\Chunky\Entry
      */
     public function makeChunk($data = [])
     {
@@ -113,7 +117,7 @@ class Chunks
             ->setTimestamp($this->timestamp);
     }
     
-    public function addChunk(Chunk $chunk)
+    public function addChunk(Entry $chunk)
     {
         if (! isset($this->chunks[$chunk->getChunk()])) {
             $this->chunks[$chunk->getChunk()] = [];

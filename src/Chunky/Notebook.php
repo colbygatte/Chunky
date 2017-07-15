@@ -89,11 +89,11 @@ abstract class ChunkyDirectory
     /**
      * @param array $data
      *
-     * @return \ColbyGatte\Chunky\Chunk
+     * @return \ColbyGatte\Chunky\Entry
      */
     public function newChunk($data = [])
     {
-        return (new Chunk)->set($data);
+        return (new Entry)->set($data);
     }
     
     /**
