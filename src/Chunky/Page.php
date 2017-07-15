@@ -2,42 +2,105 @@
 
 namespace ColbyGatte\Chunky;
 
-class Chunks
+/**
+ * Page represents a single file in a directory, where the directory is a Notebook
+ *
+ * @package ColbyGatte\Page
+ */
+class Page
 {
+    use GetHelper;
+    
     /**
-     * @var \ColbyGatte\Chunky\ChunkyDirectory
+     * @var \ColbyGatte\Chunky\Notebook
      */
-    protected $chunkyDirectory;
+    protected $notebook;
     
     /**
      * @var \ColbyGatte\Chunky\Entry[]
      */
-    protected $chunks = [];
+    protected $entries = [];
     
     /**
      * Timestamp of the
+     *
      * @var int
      */
     protected $timestamp;
     
     /**
-     * Entries constructor.
-     *
-     * @param \ColbyGatte\Chunky\ChunkyDirectory $chunkyDirectory
+     * @var resource
      */
-    public function __construct(ChunkyDirectory $chunkyDirectory)
+    protected $fileHandle;
+    
+    protected $locked = false;
+    
+    /**
+     * @param \ColbyGatte\Chunky\Notebook $notebook
+     * @param int|null $timestamp
+     */
+    public function __construct(Notebook $notebook, $timestamp = null)
     {
-        $this->chunkyDirectory = $chunkyDirectory;
+        $this->notebook = $notebook;
+        
+        $this->timestamp = $timestamp ?: time();
     }
     
     /**
-     * @param mixed $timestamp
+     * Locking does not allow you to change the timestamp.
      *
      * @return $this
      */
+    public function lock()
+    {
+        $this->locked = true;
+        
+        return $this;
+    }
+    
+    /**
+     * @param $timestamp
+     *
+     * @return $this
+     * @throws \Exception
+     */
     public function setTimestamp($timestamp)
     {
+        if ($this->locked) {
+            throw new \Exception('Cannot change timestamp, Page is locked.');
+        }
+        
         $this->timestamp = $timestamp;
+        
+        return $this;
+    }
+    
+    public function loadEntries()
+    {
+        if (! $this->timestamp) {
+            throw new \Exception('Timestamp not set');
+        }
+        
+        $file = $this->notebook->getPath($this->timestamp.'.csv');
+        
+        if (! file_exists($file)) {
+            throw new Exception("Trying to load a Trackr log that does not exist: {$this->timestamp}");
+        }
+        
+        $csvFileHandle = fopen($file, 'r');
+        
+        while (($row = fgetcsv($csvFileHandle)) !== false) {
+            if (count($row) < 2) {
+                continue;
+            }
+            
+            $this->addEntry(
+                $this->makeEntry(
+                    $row[0],
+                    $this->getHelper()->stringToTags($row[1])
+                )
+            );
+        }
         
         return $this;
     }
@@ -51,8 +114,8 @@ class Chunks
      */
     public function searchForChunk($chunk)
     {
-        return isset($this->chunks[$chunk])
-            ? $this->chunks[$chunk]
+        return isset($this->entries[$chunk])
+            ? $this->entries[$chunk]
             : false;
     }
     
@@ -60,69 +123,121 @@ class Chunks
     {
     }
     
-    public function getChunkyDirectory()
+    /**
+     * @return \ColbyGatte\Chunky\Notebook
+     */
+    public function getNotebook()
     {
-        return $this->chunkyDirectory;
+        return $this->notebook;
     }
     
-    public function getChunks()
+    public function getEntries()
     {
-        $allChunks = [];
+        $entries = [];
         
-        foreach ($this->chunks as $chunksOfSameChunk) {
-            array_push($allChunks, ...$chunksOfSameChunk);
+        foreach ($this->entries as $entriesWithSameChunk) {
+            array_push($entries, ...$entriesWithSameChunk);
         }
         
-        return $allChunks;
-    }
-    
-    public function addNewChunk($data = [])
-    {
-        $chunk = $this->makeChunk($data);
-        
-        $this->addChunk($chunk);
-        
-        return $chunk;
+        return $entries;
     }
     
     public function whereTagEqual($tag, $value = null)
     {
         $tag = is_string($tag) ? [$tag => $value] : $tag;
         
-        $result = $this->chunkyDirectory->newChunks();
+        $result = $this->notebook->newPage();
         
-        foreach ($this->chunks as $chunk) {
-            
+        foreach ($this->entries as $chunk) {
             foreach ($tag as $_tag => $_value) {
                 if ($chunk->isTagEqual($_tag, $_value)) {
                     continue 2;
                 }
             }
             
-            $result->addChunk($chunk);
+            $result->addEntry($chunk);
         }
         
         return $result;
     }
     
     /**
-     * @param $data
+     * @param string $chunk
+     * @param string|string[] $tags
      *
      * @return \ColbyGatte\Chunky\Entry
      */
-    public function makeChunk($data = [])
+    public function makeEntry($chunk, $tags)
     {
-        return $this->chunkyDirectory->newChunk()
-            ->set($data)
-            ->setTimestamp($this->timestamp);
+        return $this->notebook->newEntry()
+            ->setChunk($chunk)
+            ->setTimestamp($this->timestamp)
+            ->setTag($tags);
     }
     
-    public function addChunk(Entry $chunk)
+    /**
+     * Appending is used for reading from a Page file.
+     * Use the writeEntry() method when writing to a page file.
+     *
+     * @param \ColbyGatte\Chunky\Entry $entry
+     *
+     * @return $this
+     */
+    public function addEntry(Entry $entry)
     {
-        if (! isset($this->chunks[$chunk->getChunk()])) {
-            $this->chunks[$chunk->getChunk()] = [];
+        if (! isset($this->entries[$entry->getChunk()])) {
+            $this->entries[$entry->getChunk()] = [];
         }
         
-        $this->chunks[$chunk->getChunk()][] = $chunk;
+        $this->entries[$entry->getChunk()][] = $entry;
+        
+        return $this;
+    }
+    
+    /**
+     * Check to see we have a timestamp. If we don't,
+     * @return $this
+     * @throws \Exception
+     */
+    public function checkTimestamp()
+    {
+        if (! $this->timestamp) {
+            throw new \Exception('Timestamp is not set.');
+        }
+        
+        return $this;
+    }
+    
+    public function getFileHandle()
+    {
+        $this->checkTimestamp();
+        
+        if (! $this->fileHandle) {
+            $this->fileHandle = fopen(
+                $this->notebook->getPath($this->timestamp.'.csv'),
+                'a'
+            );
+        }
+        
+        return $this->fileHandle;
+    }
+    
+    /**
+     * Write entry will call Page::appendEntry() before writing.
+     *
+     * @param \ColbyGatte\Chunky\Entry $entry
+     *
+     * @return $this
+     */
+    public function writeEntry(Entry $entry)
+    {
+        $this->addEntry($entry);
+        
+        fputcsv(
+            $this->getFileHandle(),
+            $entry->toArray()
+        );
+        
+        return $this;
     }
 }

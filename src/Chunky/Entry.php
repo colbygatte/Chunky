@@ -2,17 +2,27 @@
 
 namespace ColbyGatte\Chunky;
 
-class Chunk
+/**
+ * @package ColbyGatte\Chunky
+ */
+class Entry
 {
-    protected static $valid = [
-        'date' => 'setDate',
-        'tag-string' => 'setTagByString',
-        'timestamp' => 'setTimestamp'
-    ];
+    use GetHelper;
     
+    /**
+     * @var string
+     */
     protected $chunk;
     
+    /**
+     * @var array
+     */
     protected $tags = [];
+    
+    /**
+     * @var \ColbyGatte\Chunky\Page
+     */
+    protected $page;
     
     /**
      * @var string Timestamp
@@ -26,29 +36,22 @@ class Chunk
     {
     }
     
+    /**
+     * @return string
+     */
     public function getChunk()
     {
         return $this->chunk;
     }
     
+    /**
+     * @param string $chunk
+     *
+     * @return $this
+     */
     public function setChunk($chunk)
     {
         $this->chunk = $chunk;
-        
-        return $this;
-    }
-    
-    public function setTagByString($string)
-    {
-        foreach (explode('|', $string) as $tagKeyValueUnParsed) {
-            $keyValue = explode(':', $tagKeyValueUnParsed, 2);
-            
-            if (count($keyValue) != 2) {
-                throw new \Exception("Error parsing tags: $string");
-            }
-            
-            $this->setTag(...$keyValue);
-        }
         
         return $this;
     }
@@ -85,35 +88,11 @@ class Chunk
         return $this;
     }
     
-    public function set($data)
-    {
-        foreach ($data as $key => $val) {
-            if (isset(static::$valid[$key])) {
-                $method = static::$valid[$key];
-                
-                $this->$method($val);
-            }
-        }
-        
-        return $this;
-    }
-    
-    public function tagsToString()
-    {
-        $tagData = [];
-        
-        foreach ($this->tags as $key => $value) {
-            $tagData[] = "$key:$value";
-        }
-        
-        return implode('|', $tagData);
-    }
-    
     public function toArray()
     {
         return [
             $this->chunk,
-            $this->tagsToString()
+            $this->getHelper()->tagsToString($this->tags)
         ];
     }
     
@@ -145,6 +124,12 @@ class Chunk
         return isset($this->tags[$tag]) ? $this->tags[$tag] : false;
     }
     
+    /**
+     * Can be used for keeping track of all tag data inside the notebook.
+     *
+     * @param $tag
+     * @param $value
+     */
     protected function emitTagInfo($tag, $value)
     {
     }

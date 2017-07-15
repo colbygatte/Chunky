@@ -2,15 +2,15 @@
 
 namespace ColbyGatte\Chunky\Tests\TestHelpers;
 
-use ColbyGatte\Chunky\ChunkyDirectory;
+use ColbyGatte\Chunky\Notebook;
 
-class SignUpsChunkyDirectory extends ChunkyDirectory
+class SignUpsNotebook extends Notebook
 {
     /**
      * @return string Location of the directory.
      */
     function directoryLocation()
     {
-        return __DIR__.'/../test-data';
+        return realpath(__DIR__.'/../test-data');
     }
 }

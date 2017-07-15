@@ -53,18 +53,18 @@ class Search
         return $this;
     }
     
-    public function searchOn(Chunks $chunks)
+    public function searchOn(Page $chunks)
     {
-        $result = $chunks->getChunkyDirectory()->newChunks();
+        $result = $chunks->getNotebook()->newPage();
         
         foreach ($this->constraints as $constraint) {
-            $constraint->setChunks($chunks);
+            $constraint->setPage($chunks);
         }
         
-        foreach ($chunks->getChunks() as $chunk) {
+        foreach ($chunks->getEntries() as $chunk) {
             foreach ($this->constraints as $class => $constraint) {
                 if ($constraint->passesTest($chunk)) {
-                    $result->addChunk($chunk);
+                    $result->addEntry($chunk);
                 }
             }
         }

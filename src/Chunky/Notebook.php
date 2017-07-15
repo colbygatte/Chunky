@@ -10,10 +10,10 @@ use Exception;
  *
  * @package ColbyGatte\Trackr
  */
-abstract class ChunkyDirectory
+abstract class Notebook
 {
     /**
-     * @var \ColbyGatte\Chunky\Chunks
+     * @var \ColbyGatte\Chunky\Page
      */
     protected $chunks;
     
@@ -22,14 +22,14 @@ abstract class ChunkyDirectory
      *
      * @return string
      */
-    abstract function directoryLocation();
+    abstract public function directoryLocation();
     
     /**
      * @param string $append
      *
      * @return string
      */
-    function getPath($append = '')
+    public function getPath($append = '')
     {
         return $this->directoryLocation().'/'.$append;
     }
@@ -37,17 +37,21 @@ abstract class ChunkyDirectory
     /**
      *
      */
-    public function loadAllChunks()
+    public function loadAllEntries()
     {
-        $chunks = $this->newChunks();
+        $page = $this->newPage();
         
         foreach ($this->getDirectoryIterator() as $fileInfo) {
             if ($timestampFromFilename = $this->parseLogFileInfo($fileInfo)) {
-                $this->loadLog($chunks, $timestampFromFilename);
+                $page->setTimestamp($timestampFromFilename)->loadEntries();
             }
         }
         
-        return $chunks;
+        // All entries are loaded, so lock up the page and set timestamp to null
+        // so we know that this is a page of all entries.
+        $page->setTimestamp(null)->lock();
+        
+        return $page;
     }
     
     public function getLatestTime()
@@ -71,7 +75,7 @@ abstract class ChunkyDirectory
     }
     
     /**
-     * @return \ColbyGatte\Chunky\Chunks
+     * @return \ColbyGatte\Chunky\Page
      */
     public function getChunks()
     {
@@ -79,69 +83,37 @@ abstract class ChunkyDirectory
     }
     
     /**
-     * @return \ColbyGatte\Chunky\Chunks
+     * A Page assigns its timestamp to itself. All we need to do is give it the Notebook it is in.
+     *
+     * @param int|null $timestamp
+     *
+     * @return \ColbyGatte\Chunky\Page
      */
-    public function newChunks()
+    public function newPage($timestamp = null)
     {
-        return new Chunks($this);
+        return new Page($this, $timestamp);
     }
     
     /**
-     * @param array $data
+     * The only place new Entry instances are created is here.
+     * If you want to use a custom Entry, override this method.
      *
      * @return \ColbyGatte\Chunky\Entry
      */
-    public function newChunk($data = [])
+    public function newEntry()
     {
-        return (new Entry)->set($data);
+        return new Entry;
     }
     
     /**
-     * @param null $timestamp
+     * @param $timestamp
      *
-     * @return \ColbyGatte\Chunky\ChunkWriter
-     */
-    public function newLogFile($timestamp = null)
-    {
-        $timestamp = $timestamp ?: time();
-        
-        $fh = fopen($this->getPath($timestamp.'.csv'), 'w');
-        
-        return (new ChunkWriter)
-            ->setFileHandle($fh)
-            ->setChunkyDirectory($this);
-    }
-    
-    /**
-     * @param \ColbyGatte\Chunky\Chunks $chunks
-     * @param $trackrLogTimestamp
-     *
-     * @return \ColbyGatte\Chunky\Chunks
+     * @return \ColbyGatte\Chunky\Page
      * @throws \Exception
      */
-    public function loadLog(Chunks $chunks, $trackrLogTimestamp)
+    public function loadPage($timestamp)
     {
-        $file = $this->getPath($trackrLogTimestamp.'.csv');
-        
-        if (! file_exists($file)) {
-            throw new Exception("Trying to load a Trackr log that does not exist: $trackrLogTimestamp");
-        }
-        
-        $csvFileHandle = fopen($file, 'r');
-        
-        while (($row = fgetcsv($csvFileHandle)) !== false) {
-            if (count($row) < 2) {
-                continue;
-            }
-            
-            $chunks->addNewChunk([
-                'chunk' => $row[0],
-                'timestamp' => $trackrLogTimestamp,
-                'tag-string' => $row[1]
-            ]);
-        }
-        
-        return $chunks;
+        return $this->newPage($timestamp)->loadEntries()->lock();
     }
     
     protected function parseLogFileInfo(\SplFileInfo $fileInfo)

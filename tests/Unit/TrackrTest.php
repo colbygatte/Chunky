@@ -3,8 +3,8 @@
 namespace ColbyGatte\Chunky\Tests\Unit;
 
 use ColbyGatte\Chunky\Tests\TestCase;
-use ColbyGatte\Chunky\Tests\TestHelpers\SignUpsChunkyDirectory;
-use ColbyGatte\Chunky\Tests\TestHelpers\TestWriteChunkyDirectory;
+use ColbyGatte\Chunky\Tests\TestHelpers\SignUpsNotebook;
+use ColbyGatte\Chunky\Tests\TestHelpers\TestWriteNotebook;
 use ColbyGatte\Chunky\TrackrRules;
 use Faker\Factory as FakerFactory;
 
@@ -14,12 +14,12 @@ class TrackrTest extends TestCase
     
     public function testing_yo()
     {
-        $chunkyDirectory = new TestWriteChunkyDirectory();
+        $notebook = new TestWriteNotebook();
         
-        $writer = $chunkyDirectory->newLogFile();
+        $page = $notebook->newPage();
         
         for ($i = 0; $i < 1000; $i++) {
-            $e = $writer->writeChunk(
+            $entry = $page->makeEntry(
                 $this->faker->uuid,
                 [
                     'color' => $this->faker->colorName,
@@ -29,11 +29,13 @@ class TrackrTest extends TestCase
                     'country' => $this->faker->country,
                 ]
             );
+            
+            $page->writeEntry($entry);
         }
         
         $count = 0;
         
-        $fh = fopen($chunkyDirectory->getLatestFile(), 'r');
+        $fh = fopen($notebook->getLatestFile(), 'r');
         
         while (false !== ($row = fgetcsv($fh))) {
             $count++;
@@ -45,7 +47,7 @@ class TrackrTest extends TestCase
     /** @test */
     public function can_get_latest()
     {
-        $trackr = new SignUpsChunkyDirectory;
+        $trackr = new SignUpsNotebook;
         
         $this->assertEquals('1500077646', $trackr->getLatestTime());
     }

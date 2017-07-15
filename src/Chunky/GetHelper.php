@@ -2,6 +2,13 @@
 
 namespace ColbyGatte\Chunky;
 
-class GetHelper
+trait GetHelper
 {
+    /**
+     * @return \ColbyGatte\Chunky\Helper
+     */
+    public function getHelper()
+    {
+        return Helper::instance();
+    }
 }

@@ -7,16 +7,16 @@ interface ConstraintInterface
     /**
      * Called before the test is ran.
      *
-     * @param \ColbyGatte\Chunky\Chunks $chunks
+     * @param \ColbyGatte\Chunky\Page $chunks
      *
      * @return void
      */
-    public function setChunks(Chunks $chunks);
+    public function setPage(Page $chunks);
     
     /**
-     * @param \ColbyGatte\Chunky\Chunk $chunk
+     * @param \ColbyGatte\Chunky\Entry $chunk
      *
      * @return bool
      */
-    public function passesTest(Chunk $chunk);
+    public function passesTest(Entry $chunk);
 }
