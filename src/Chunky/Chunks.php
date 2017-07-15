@@ -43,7 +43,14 @@ class Chunks
         return $this;
     }
     
-    public function getChunk($chunk)
+    /**
+     * Search for all chunks equal to $chunk
+     *
+     * @param $chunk
+     *
+     * @return bool|\ColbyGatte\Chunky\Chunk
+     */
+    public function searchForChunk($chunk)
     {
         return isset($this->chunks[$chunk])
             ? $this->chunks[$chunk]
@@ -68,7 +75,13 @@ class Chunks
     
     public function getChunks()
     {
-        return $this->chunks;
+        $allChunks = [];
+        
+        foreach ($this->chunks as $chunksOfSameChunk) {
+            array_push($allChunks, ...$chunksOfSameChunk);
+        }
+        
+        return $allChunks;
     }
     
     public function addNewChunk($data)
@@ -112,7 +125,11 @@ class Chunks
     
     public function addChunk(Chunk $chunk)
     {
-        $this->chunks[] = $chunk;
+        if (! isset($this->chunks[$chunk->getChunk()])) {
+            $this->chunks[$chunk->getChunk()] = [];
+        }
+        
+        $this->chunks[$chunk->getChunk()][] = $chunk;
     }
     
     public function writeChunk($chunk)

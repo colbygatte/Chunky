@@ -11,7 +11,7 @@ use ColbyGatte\Chunky\Tests\TestHelpers\BlueChunkSearch;
 class ConstraintTest extends TestCase
 {
     /** @test */
-    public function constraint()
+    public function can_use_constraint()
     {
         $entries = (new SignUpsChunkyDirectory())->loadAllChunks();
         
