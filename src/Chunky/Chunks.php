@@ -10,11 +10,6 @@ class Chunks
     protected $chunkyDirectory;
     
     /**
-     * @var
-     */
-    protected $fileHandle;
-    
-    /**
      * @var \ColbyGatte\Chunky\Chunk[]
      */
     protected $chunks = [];
@@ -57,13 +52,6 @@ class Chunks
             : false;
     }
     
-    public function setFileHandle($fileHandle)
-    {
-        $this->fileHandle = $fileHandle;
-        
-        return $this;
-    }
-    
     public function getAllUsedTags()
     {
     }
@@ -84,7 +72,7 @@ class Chunks
         return $allChunks;
     }
     
-    public function addNewChunk($data)
+    public function addNewChunk($data = [])
     {
         $chunk = $this->makeChunk($data);
         
@@ -120,7 +108,9 @@ class Chunks
      */
     public function makeChunk($data = [])
     {
-        return (new Chunk)->set($data)->setTimestamp($this->timestamp);
+        return $this->chunkyDirectory->newChunk()
+            ->set($data)
+            ->setTimestamp($this->timestamp);
     }
     
     public function addChunk(Chunk $chunk)
@@ -130,20 +120,5 @@ class Chunks
         }
         
         $this->chunks[$chunk->getChunk()][] = $chunk;
-    }
-    
-    public function writeChunk($chunk)
-    {
-        if (is_array($chunk)) {
-            $chunk = $this->makeChunk($chunk);
-        }
-        
-        $this->addChunk($chunk);
-        
-        if (! $this->fileHandle) {
-            throw new Exception("Error writing chunk");
-        }
-        
-        fputcsv($this->fileHandle, $chunk->toArray());
     }
 }

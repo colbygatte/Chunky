@@ -14,37 +14,34 @@ class TrackrTest extends TestCase
     
     public function testing_yo()
     {
-        $trackr = new TestWriteChunkyDirectory();
+        $chunkyDirectory = new TestWriteChunkyDirectory();
         
-        $entries = $trackr->newLogFile()->setTimestamp(time());
-        
-        $time = time();
+        $writer = $chunkyDirectory->newLogFile();
         
         for ($i = 0; $i < 1000; $i++) {
-            $e = $entries->makeChunk()
-                ->setChunk($this->faker->uuid)
-                ->setTag([
+            $e = $writer->writeChunk(
+                $this->faker->uuid,
+                [
                     'color' => $this->faker->colorName,
                     'priority' => $this->faker->numberBetween(0, 10),
                     'email' => $this->faker->email,
                     'city' => $this->faker->city,
                     'country' => $this->faker->country,
-                ]);
-            
-            $entries->writeChunk($e);
+                ]
+            );
         }
         
         $count = 0;
         
-        $fh = fopen($entries->getChunkyDirectory()->getLatestFile(), 'r');
+        $fh = fopen($chunkyDirectory->getLatestFile(), 'r');
         
-        while(false !== ($row = fgetcsv($fh))) {
+        while (false !== ($row = fgetcsv($fh))) {
             $count++;
         }
         
-        $this->assertEquals(1001, $count);
+        $this->assertEquals(1000, $count);
     }
-
+    
     /** @test */
     public function can_get_latest()
     {

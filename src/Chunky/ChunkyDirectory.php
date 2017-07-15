@@ -87,9 +87,19 @@ abstract class ChunkyDirectory
     }
     
     /**
+     * @param array $data
+     *
+     * @return \ColbyGatte\Chunky\Chunk
+     */
+    public function newChunk($data = [])
+    {
+        return (new Chunk)->set($data);
+    }
+    
+    /**
      * @param null $timestamp
      *
-     * @return \ColbyGatte\Chunky\Chunks
+     * @return \ColbyGatte\Chunky\ChunkWriter
      */
     public function newLogFile($timestamp = null)
     {
@@ -97,9 +107,9 @@ abstract class ChunkyDirectory
         
         $fh = fopen($this->getPath($timestamp.'.csv'), 'w');
         
-        fputcsv($fh, ['chunk', 'tags']);
-        
-        return $this->newChunks()->setTimestamp($timestamp)->setFileHandle($fh);
+        return (new ChunkWriter)
+            ->setFileHandle($fh)
+            ->setChunkyDirectory($this);
     }
     
     /**
