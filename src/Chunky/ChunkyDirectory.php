@@ -37,7 +37,7 @@ abstract class ChunkyDirectory
     /**
      *
      */
-    public function loadLogFiles()
+    public function loadAllChunks()
     {
         $chunks = $this->newChunks();
         
@@ -73,7 +73,7 @@ abstract class ChunkyDirectory
     /**
      * @return \ColbyGatte\Chunky\Chunks
      */
-    public function all()
+    public function getChunks()
     {
         return $this->chunks;
     }

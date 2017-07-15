@@ -13,7 +13,7 @@ class ConstraintTest extends TestCase
     /** @test */
     public function constraint()
     {
-        $entries = (new SignUpsChunkyDirectory())->loadLogFiles();
+        $entries = (new SignUpsChunkyDirectory())->loadAllChunks();
         
         $entries = (new BlueChunkSearch())->searchOn($entries);
         
