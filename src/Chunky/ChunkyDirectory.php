@@ -99,7 +99,7 @@ abstract class ChunkyDirectory
         
         fputcsv($fh, ['chunk', 'tags']);
         
-        return $this->newChunks()->setFileHandle($fh);
+        return $this->newChunks()->setTimestamp($timestamp)->setFileHandle($fh);
     }
     
     /**
