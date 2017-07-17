@@ -30,6 +30,11 @@ class Entry
     protected $timestamp;
     
     /**
+     * @var \ColbyGatte\Chunky\SearchReport[]
+     */
+    protected $searchReports = [];
+    
+    /**
      * Chunk constructor.
      */
     public function __construct()
@@ -100,7 +105,7 @@ class Entry
     {
         $tagValue = $this->getTag($tag);
         
-        if ($tagValue === false ){
+        if ($tagValue === false) {
             return false;
         }
         
@@ -122,6 +127,20 @@ class Entry
     public function getTag($tag)
     {
         return isset($this->tags[$tag]) ? $this->tags[$tag] : false;
+    }
+    
+    /**
+     * @return \ColbyGatte\Chunky\SearchReport
+     */
+    public function latestSearchReport() {
+        return end($this->searchReports);
+    }
+    
+    public function newSearchReport()
+    {
+        $this->searchReports[] = $searchReport = new SearchReport;
+        
+        return $searchReport;
     }
     
     /**

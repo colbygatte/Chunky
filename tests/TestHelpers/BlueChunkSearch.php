@@ -7,6 +7,7 @@ use ColbyGatte\Chunky\Search;
 class BlueChunkSearch extends Search
 {
     protected $constraints = [
-        ColorHasBlueConstraint::class
+        ColorHasBlueConstraint::class,
+        PriorityIsFiveConstraint::class
     ];
 }

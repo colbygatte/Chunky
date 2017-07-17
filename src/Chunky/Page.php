@@ -131,6 +131,9 @@ class Page
         return $this->notebook;
     }
     
+    /**
+     * @return \ColbyGatte\Chunky\Entry[]
+     */
     public function getEntries()
     {
         $entries = [];

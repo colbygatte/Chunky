@@ -8,7 +8,7 @@ use ColbyGatte\Chunky\Tests\TestHelpers\TestWriteNotebook;
 use ColbyGatte\Chunky\TrackrRules;
 use Faker\Factory as FakerFactory;
 
-class TrackrTest extends TestCase
+class ChunkyTest extends TestCase
 {
     protected $faker;
     
@@ -35,7 +35,7 @@ class TrackrTest extends TestCase
         
         $count = 0;
         
-        $fh = fopen($notebook->getLatestFile(), 'r');
+        $fh = fopen($notebook->getLatestPageFile(), 'r');
         
         while (false !== ($row = fgetcsv($fh))) {
             $count++;
@@ -49,7 +49,7 @@ class TrackrTest extends TestCase
     {
         $trackr = new SignUpsNotebook;
         
-        $this->assertEquals('1500077646', $trackr->getLatestTime());
+        $this->assertEquals('1500077646', $trackr->getLatestPage());
     }
     
     protected function setUp()

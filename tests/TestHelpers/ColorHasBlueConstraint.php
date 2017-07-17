@@ -6,18 +6,10 @@ use ColbyGatte\Chunky\ConstraintInterface;
 use ColbyGatte\Chunky\Page;
 use ColbyGatte\Chunky\Entry;
 
-class ColorHasBlueConstraint implements ConstraintInterface
+class ColorHasBlueConstraint extends ConstraintInterface
 {
-    public function passesTest(Entry $chunk)
+    public function passesTest()
     {
-        $result = (
-            ($color = $chunk->getTag('color')) && preg_match('/blue/i', $color)
-        );
-        
-        return $result;
-    }
-    
-    public function setPage(Page $chunks)
-    {
+        return $this->tagPregMatches('color', '/blue/i');;
     }
 }

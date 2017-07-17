@@ -31,12 +31,10 @@ class Search
      */
     public function addConstraint($constraint)
     {
-        if (! in_array(ConstraintInterface::class, class_implements($constraint))) {
+        $constraint = is_string($constraint) ? new $constraint : $constraint;
+    
+        if (! is_subclass_of($constraint, ConstraintInterface::class)) {
             throw new \Exception("$constraint does not implement ConstraintInterface");
-        }
-        
-        if (is_string($constraint)) {
-            $constraint = new $constraint;
         }
         
         $this->constraints[get_class($constraint)] = $constraint;
@@ -53,22 +51,53 @@ class Search
         return $this;
     }
     
-    public function searchOn(Page $chunks)
+    /**
+     * A Result set of entries is returned as a Page
+     *
+     * @param \ColbyGatte\Chunky\Page $page
+     *
+     * @return \ColbyGatte\Chunky\Page
+     */
+    public function searchOn(Page $page)
     {
-        $result = $chunks->getNotebook()->newPage();
+        $result = $page->getNotebook()->newPage();
         
         foreach ($this->constraints as $constraint) {
-            $constraint->setPage($chunks);
+            $constraint->setPage($page);
         }
         
-        foreach ($chunks->getEntries() as $chunk) {
-            foreach ($this->constraints as $class => $constraint) {
-                if ($constraint->passesTest($chunk)) {
-                    $result->addEntry($chunk);
-                }
+        foreach ($page->getEntries() as $entry) {
+            if ($this->passesAllConstraints($entry)) {
+                $result->addEntry($entry);
             }
         }
         
         return $result;
+    }
+    
+    /**
+     * A SearchReport is instantiated from the Entry (which will add the report to itself)
+     *
+     * Each constraint is assigned the entry and then used to test for pass/fail, and the result is logged on the search report.
+     *
+     * @param \ColbyGatte\Chunky\Entry $entry
+     *
+     * @return bool
+     */
+    public function passesAllConstraints(Entry $entry)
+    {
+        $searchReport = $entry->newSearchReport();
+        
+        foreach ($this->constraints as $class => $constraint) {
+            $constraint->setEntry($entry);
+            $searchReport->logConstraint($constraint, $constraint->passesTest($entry));
+        }
+        
+        // Reset the Entry on each constraint
+        foreach ($this->constraints as $class => $constraint) {
+            $constraint->setEntry(null);
+        }
+        
+        return $searchReport->passesAll();
     }
 }

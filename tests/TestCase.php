@@ -8,10 +8,10 @@ class TestCase extends BaseTestCase
 {
     protected function tearDown()
     {
-        $removeFiles = __DIR__ .'/data/*';
-    
+        $removeFiles = __DIR__.'/data/*';
+        
         exec("rm -rf $removeFiles");
-    
+        
         parent::tearDown();
     }
 }

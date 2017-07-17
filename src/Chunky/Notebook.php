@@ -15,7 +15,7 @@ abstract class Notebook
     /**
      * @var \ColbyGatte\Chunky\Page
      */
-    protected $chunks;
+    protected $pages;
     
     /**
      * Location of the directory.
@@ -35,7 +35,7 @@ abstract class Notebook
     }
     
     /**
-     *
+     * @return \ColbyGatte\Chunky\Page
      */
     public function loadAllEntries()
     {
@@ -54,9 +54,12 @@ abstract class Notebook
         return $page;
     }
     
-    public function getLatestTime()
+    /**
+     * @return false|int Will return the timestamp if found, false if not
+     */
+    public function getLatestPage()
     {
-        $latest = 0;
+        $latest = false;
         
         foreach ($this->getDirectoryIterator() as $fileInfo) {
             if ($timestamp = $this->parseLogFileInfo($fileInfo)) {
@@ -69,17 +72,24 @@ abstract class Notebook
         return $latest;
     }
     
-    public function getLatestFile()
+    /**
+     * @return string
+     */
+    public function getLatestPageFile()
     {
-        return $this->getPath($this->getLatestTime().'.csv');
+        if ($latestPage = $this->getLatestPage()) {
+            return $this->getPath($latestPage.'.csv');
+        }
+        
+        return false;
     }
     
     /**
      * @return \ColbyGatte\Chunky\Page
      */
-    public function getChunks()
+    public function getPages()
     {
-        return $this->chunks;
+        return $this->pages;
     }
     
     /**
