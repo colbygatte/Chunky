@@ -67,6 +67,16 @@ abstract class ConstraintInterface
     }
     
     /**
+     * @param int $timestamp
+     *
+     * @return bool
+     */
+    public function entryIsOlderThan($timestamp)
+    {
+        return $this->entry->getTimestamp() < $timestamp;
+    }
+    
+    /**
      * @param \ColbyGatte\Chunky\Entry $chunk
      *
      * @return bool

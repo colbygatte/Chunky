@@ -93,6 +93,11 @@ class Entry
         return $this;
     }
     
+    public function getTimestamp()
+    {
+        return $this->timestamp;
+    }
+    
     public function toArray()
     {
         return [

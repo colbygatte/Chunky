@@ -124,6 +124,22 @@ class Page
     }
     
     /**
+     * Using isset() on an associative array is faster than using array_
+     *
+     * @return array
+     */
+    public function getAllChunksAsKey()
+    {
+        $chunksAsKey = [];
+        
+        foreach ($this->entries as $entry) {
+            $chunksAsKey[$entry->getChunk()] = true;
+        }
+        
+        return $chunksAsKey;
+    }
+    
+    /**
      * @return \ColbyGatte\Chunky\Notebook
      */
     public function getNotebook()
