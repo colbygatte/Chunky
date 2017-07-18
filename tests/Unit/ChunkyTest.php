@@ -44,17 +44,15 @@ class ChunkyTest extends TestCase
     /** @test */
     public function can_get_latest()
     {
-        $trackr = new SignUpsNotebook;
-        
-        $this->assertEquals('1500077646', $trackr->getLatestPageTimestamp());
-    }
-    
-    /** @test */
-    public function can_get_all_chunks_as_key()
-    {
         $notebook = new SignUpsNotebook;
         
-        $page = $notebook->loadLatestPage();
+        $this->assertEquals('1500077646', $notebook->getLatestPageTimestamp());
+    }
+    
+    /**  */
+    public function can_get_all_chunks_as_key()
+    {
+        $page = (new SignUpsNotebook)->loadLatestPage();
         
         dump($page->getAllChunksAsKey());
     }

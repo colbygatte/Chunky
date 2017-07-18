@@ -77,9 +77,11 @@ class Entry
             }
         } else {
             $tag = preg_replace('/[^\w0-9\-]/', '', strtolower($tag));
+            
             $value = preg_replace('/[^\w0-9\-%#@\.\h]/', '', $value);
             
             $this->emitTagInfo($tag, $value);
+            
             $this->tags[$tag] = $value;
         }
         
@@ -137,7 +139,8 @@ class Entry
     /**
      * @return \ColbyGatte\Chunky\SearchReport
      */
-    public function latestSearchReport() {
+    public function latestSearchReport()
+    {
         return end($this->searchReports);
     }
     
@@ -149,10 +152,10 @@ class Entry
     }
     
     /**
-     * Can be used for keeping track of all tag data inside the notebook.
+     * Called any time a tag is set.
      *
-     * @param $tag
-     * @param $value
+     * @param string $tag
+     * @param string $value
      */
     protected function emitTagInfo($tag, $value)
     {

@@ -61,10 +61,8 @@ abstract class Notebook
         $latest = false;
         
         foreach ($this->getDirectoryIterator() as $fileInfo) {
-            if ($timestamp = $this->parseLogFileInfo($fileInfo)) {
-                if ($timestamp > $latest) {
-                    $latest = $timestamp;
-                }
+            if (($timestamp = $this->parseLogFileInfo($fileInfo)) && $timestamp > $latest) {
+                $latest = $timestamp;
             }
         }
         
@@ -76,9 +74,9 @@ abstract class Notebook
      */
     public function loadLatestPage()
     {
-        if ($latestTimestamp = $this->getLatestPageTimestamp()) {
-            return $this->newPage($latestTimestamp)->loadEntries();
-        }
+        return ($latestTimestamp = $this->getLatestPageTimestamp())
+            ? $this->newPage($latestTimestamp)->loadEntries()
+            : false;
     }
     
     /**
@@ -86,11 +84,9 @@ abstract class Notebook
      */
     public function getLatestPageFile()
     {
-        if ($latestPage = $this->getLatestPageTimestamp()) {
-            return $this->getPath($latestPage.'.csv');
-        }
-        
-        return false;
+        return ($latestPage = $this->getLatestPageTimestamp())
+            ? $this->getPath($latestPage.'.csv')
+            : false;
     }
     
     /**

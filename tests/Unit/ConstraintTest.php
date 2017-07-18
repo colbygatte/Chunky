@@ -11,11 +11,11 @@ class ConstraintTest extends TestCase
     /** @test */
     public function can_use_constraint()
     {
-        $entries = (new SignUpsNotebook)->loadAllEntries();
+        $resultEntries = (new BlueChunkSearch)->searchOn(
+            (new SignUpsNotebook)->loadAllEntries()
+        );
         
-        $entries = (new BlueChunkSearch)->searchOn($entries);
-        
-        $this->assertCount(41, $entries->getEntries());
+        $this->assertCount(41, $resultEntries->getEntries());
     }
     
     /** @test */
