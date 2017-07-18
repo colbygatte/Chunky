@@ -17,7 +17,9 @@ class Page
     protected $notebook;
     
     /**
-     * @var \ColbyGatte\Chunky\Entry[]
+     * Chunk is the key matched with all the entries with that chunk.
+     *
+     * @var array
      */
     protected $entries = [];
     
@@ -124,19 +126,13 @@ class Page
     }
     
     /**
-     * Using isset() on an associative array is faster than using array_
+     * Using isset() on an associative array is faster than using in_array() on a regular array
      *
      * @return array
      */
     public function getAllChunksAsKey()
     {
-        $chunksAsKey = [];
-        
-        foreach ($this->entries as $entry) {
-            $chunksAsKey[$entry->getChunk()] = true;
-        }
-        
-        return $chunksAsKey;
+        return array_fill_keys(array_keys($this->entries), true);
     }
     
     /**

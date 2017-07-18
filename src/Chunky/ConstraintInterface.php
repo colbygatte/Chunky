@@ -77,8 +77,6 @@ abstract class ConstraintInterface
     }
     
     /**
-     * @param \ColbyGatte\Chunky\Entry $chunk
-     *
      * @return bool
      */
     abstract public function passesTest();

@@ -6,12 +6,9 @@ use ColbyGatte\Chunky\Tests\TestCase;
 use ColbyGatte\Chunky\Tests\TestHelpers\SignUpsNotebook;
 use ColbyGatte\Chunky\Tests\TestHelpers\TestWriteNotebook;
 use ColbyGatte\Chunky\TrackrRules;
-use Faker\Factory as FakerFactory;
 
 class ChunkyTest extends TestCase
 {
-    protected $faker;
-    
     public function testing_yo()
     {
         $notebook = new TestWriteNotebook();
@@ -49,18 +46,16 @@ class ChunkyTest extends TestCase
     {
         $trackr = new SignUpsNotebook;
         
-        $this->assertEquals('1500077646', $trackr->getLatestPage());
+        $this->assertEquals('1500077646', $trackr->getLatestPageTimestamp());
     }
     
-    protected function setUp()
+    /** @test */
+    public function can_get_all_chunks_as_key()
     {
-        parent::setUp();
+        $notebook = new SignUpsNotebook;
         
-        $this->faker = FakerFactory::create();
-    }
-    
-    protected function tearDown()
-    {
-        parent::tearDown();
+        $page = $notebook->loadLatestPage();
+        
+        dump($page->getAllChunksAsKey());
     }
 }

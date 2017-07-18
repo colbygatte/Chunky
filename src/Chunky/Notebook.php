@@ -3,7 +3,6 @@
 namespace ColbyGatte\Chunky;
 
 use DirectoryIterator;
-use Exception;
 
 /**
  * Class Trackr
@@ -57,7 +56,7 @@ abstract class Notebook
     /**
      * @return false|int Will return the timestamp if found, false if not
      */
-    public function getLatestPage()
+    public function getLatestPageTimestamp()
     {
         $latest = false;
         
@@ -73,11 +72,21 @@ abstract class Notebook
     }
     
     /**
+     * @return \ColbyGatte\Chunky\Page
+     */
+    public function loadLatestPage()
+    {
+        if ($latestTimestamp = $this->getLatestPageTimestamp()) {
+            return $this->newPage($latestTimestamp)->loadEntries();
+        }
+    }
+    
+    /**
      * @return string
      */
     public function getLatestPageFile()
     {
-        if ($latestPage = $this->getLatestPage()) {
+        if ($latestPage = $this->getLatestPageTimestamp()) {
             return $this->getPath($latestPage.'.csv');
         }
         
