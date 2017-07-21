@@ -53,6 +53,8 @@ abstract class ConstraintInterface
         if ($actualValue = $this->entry->getTag($tag)) {
             return $strictComparison ? $value === $actualValue : $value == $actualValue;
         }
+        
+        return false;
     }
     
     /**

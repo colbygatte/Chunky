@@ -38,7 +38,7 @@ abstract class Notebook
      */
     public function loadAllEntries()
     {
-        $page = $this->newPage();
+        $page = $this->newPage(false);
         
         foreach ($this->getDirectoryIterator() as $fileInfo) {
             if ($timestampFromFilename = $this->parseLogFileInfo($fileInfo)) {

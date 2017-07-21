@@ -35,7 +35,20 @@ class Page
      */
     protected $fileHandle;
     
+    /**
+     * Lock the timestamp.
+     *
+     * @var bool
+     */
     protected $locked = false;
+    
+    /**
+     * Stays null until @see Page::addNote()
+     * or @see Page::loadNotes() is called.
+     *
+     * @var string[]
+     */
+    protected $notes;
     
     /**
      * @param \ColbyGatte\Chunky\Notebook $notebook
@@ -45,7 +58,13 @@ class Page
     {
         $this->notebook = $notebook;
         
-        $this->timestamp = $timestamp ?: time();
+        if ($timestamp !== false) {
+            $this->timestamp = $timestamp ?: time();
+    
+            if (! file_exists($this->pagePath())) {
+                touch($this->pagePath());
+            }
+        }
     }
     
     /**
@@ -77,16 +96,39 @@ class Page
         return $this;
     }
     
+    public function getTimestamp()
+    {
+        return $this->timestamp;
+    }
+    
+    protected function pagePath()
+    {
+        if (! $this->timestamp) {
+            throw new \Exception('pagePath(): timestamp not set');
+        }
+        
+        return $this->notebook->getPath($this->timestamp.'.csv');
+    }
+    
+    protected function pageNotesPath()
+    {
+        if (! $this->timestamp) {
+            throw new \Exception('pagePath(): timestamp not set');
+        }
+    
+        return $this->notebook->getPath($this->timestamp.'.notes.txt');
+    }
+    
     public function loadEntries()
     {
         if (! $this->timestamp) {
             throw new \Exception('Timestamp not set');
         }
         
-        $file = $this->notebook->getPath($this->timestamp.'.csv');
+        $file = $this->pagePath();
         
         if (! file_exists($file)) {
-            throw new Exception("Trying to load a Trackr log that does not exist: {$this->timestamp}");
+            throw new \Exception("Trying to load a Chunky log that does not exist: {$this->timestamp}");
         }
         
         $csvFileHandle = fopen($file, 'r');
@@ -229,7 +271,7 @@ class Page
         
         if (! $this->fileHandle) {
             $this->fileHandle = fopen(
-                $this->notebook->getPath($this->timestamp.'.csv'),
+                $this->pagePath(),
                 'a'
             );
         }
@@ -238,7 +280,53 @@ class Page
     }
     
     /**
-     * Write entry will call Page::appendEntry() before writing.
+     * @return string[]
+     */
+    public function loadNotes()
+    {
+        if (! file_exists($this->pageNotesPath())) {
+            touch($this->pageNotesPath());
+        }
+        
+        $fh = fopen($this->pageNotesPath(), 'r');
+        
+        $notes = [];
+        
+        while (false !== ($note = fgets($fh))) {
+            $notes[] = trim($note);
+        }
+    
+        $this->notes = $notes;
+        
+        return $notes;
+    }
+    
+    public function addNote($note)
+    {
+        if (! is_string($note)) {
+            throw new \Exception('$note must be a string');
+        }
+        
+        if (is_null($this->notes)) {
+            $this->loadNotes();
+        }
+    
+        $this->notes[] = $note;
+    }
+    
+    public function writeNotes()
+    {
+        if (is_null($this->notes)) {
+            throw new \Exception('$notes is null');
+        }
+        
+        $fh = fopen($this->pageNotesPath(), 'w');
+        fwrite($fh, implode("\n", $this->notes));
+        fclose($fh);
+    }
+    
+    /**
+     * Write entry will call @see Page::addEntry() before writing.
      *
      * @param \ColbyGatte\Chunky\Entry $entry
      *

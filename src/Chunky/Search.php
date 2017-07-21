@@ -60,7 +60,7 @@ class Search
      */
     public function searchOn(Page $page)
     {
-        $result = $page->getNotebook()->newPage();
+        $result = $page->getNotebook()->newPage(false);
         
         foreach ($this->constraints as $constraint) {
             $constraint->setPage($page);
