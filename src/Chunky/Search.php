@@ -7,7 +7,7 @@ class Search
     /**
      * @var \ColbyGatte\Chunky\ConstraintInterface[]
      */
-    protected $constraints;
+    protected $constraints = [];
     
     /**
      * Search constructor.
