@@ -9,7 +9,7 @@ use ColbyGatte\Chunky\TrackrRules;
 
 class ChunkyTest extends TestCase
 {
-    public function testing_yo()
+    public function test_write_notebook()
     {
         $notebook = new TestWriteNotebook();
         
@@ -56,5 +56,35 @@ class ChunkyTest extends TestCase
         $page = (new SignUpsNotebook)->loadLatestPage();
         
         dump($page->getAllChunksAsKey());
+    }
+    
+    /** @test */
+    public function can_get_unique_chunk_count()
+    {
+        $notebook = new SignUpsNotebook;
+        
+        $page = $notebook->loadAllEntries();
+        
+        $originalCount = count($page);
+        
+        // Add a chunk that already exists
+        $page->addEntry(
+            $notebook->newEntry()->setChunk('43be5057-ef13-314a-9365-f604c3bee9d2')
+        );
+        
+        $this->assertCount(
+            $originalCount,
+            $page
+        );
+        
+        // Add a chunk that doesn't exist
+        $page->addEntry(
+            $notebook->newEntry()->setChunk('new chunk for you!')
+        );
+        
+        $this->assertCount(
+            $originalCount + 1,
+            $page
+        );
     }
 }

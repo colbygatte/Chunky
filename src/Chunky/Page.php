@@ -2,12 +2,17 @@
 
 namespace ColbyGatte\Chunky;
 
+use Countable;
+use Exception;
+
 /**
  * Page represents a single file in a directory, where the directory is a Notebook
  *
+ * This class is countable: The count will return the number of unique chunks.
+ *
  * @package ColbyGatte\Page
  */
-class Page
+class Page implements Countable
 {
     use GetHelper;
     
@@ -17,7 +22,9 @@ class Page
     protected $notebook;
     
     /**
-     * Chunk is the key matched with all the entries with that chunk.
+     * Associative array:
+     *   Key: Chunk
+     *   Value: Array of entries
      *
      * @var array
      */
@@ -60,7 +67,7 @@ class Page
         
         if ($timestamp !== false) {
             $this->timestamp = $timestamp ?: time();
-    
+            
             if (! file_exists($this->pagePath())) {
                 touch($this->pagePath());
             }
@@ -88,7 +95,7 @@ class Page
     public function setTimestamp($timestamp)
     {
         if ($this->locked) {
-            throw new \Exception('Cannot change timestamp, Page is locked.');
+            throw new Exception('Cannot change timestamp, Page is locked.');
         }
         
         $this->timestamp = $timestamp;
@@ -101,34 +108,16 @@ class Page
         return $this->timestamp;
     }
     
-    protected function pagePath()
-    {
-        if (! $this->timestamp) {
-            throw new \Exception('pagePath(): timestamp not set');
-        }
-        
-        return $this->notebook->getPath($this->timestamp.'.csv');
-    }
-    
-    protected function pageNotesPath()
-    {
-        if (! $this->timestamp) {
-            throw new \Exception('pagePath(): timestamp not set');
-        }
-    
-        return $this->notebook->getPath($this->timestamp.'.notes.txt');
-    }
-    
     public function loadEntries()
     {
         if (! $this->timestamp) {
-            throw new \Exception('Timestamp not set');
+            throw new Exception('Timestamp not set');
         }
         
         $file = $this->pagePath();
         
         if (! file_exists($file)) {
-            throw new \Exception("Trying to load a Chunky log that does not exist: {$this->timestamp}");
+            throw new Exception("Trying to load a Chunky log that does not exist: {$this->timestamp}");
         }
         
         $csvFileHandle = fopen($file, 'r');
@@ -253,13 +242,14 @@ class Page
     
     /**
      * Check to see we have a timestamp. If we don't,
+     *
      * @return $this
      * @throws \Exception
      */
     public function checkTimestamp()
     {
         if (! $this->timestamp) {
-            throw new \Exception('Timestamp is not set.');
+            throw new Exception('Timestamp is not set.');
         }
         
         return $this;
@@ -295,7 +285,7 @@ class Page
         while (false !== ($note = fgets($fh))) {
             $notes[] = trim($note);
         }
-    
+        
         $this->notes = $notes;
         
         return $notes;
@@ -304,20 +294,20 @@ class Page
     public function addNote($note)
     {
         if (! is_string($note)) {
-            throw new \Exception('$note must be a string');
+            throw new Exception('$note must be a string');
         }
         
         if (is_null($this->notes)) {
             $this->loadNotes();
         }
-    
+        
         $this->notes[] = $note;
     }
     
     public function writeNotes()
     {
         if (is_null($this->notes)) {
-            throw new \Exception('$notes is null');
+            throw new Exception('$notes is null');
         }
         
         $fh = fopen($this->pageNotesPath(), 'w');
@@ -342,5 +332,33 @@ class Page
         );
         
         return $this;
+    }
+    
+    /**
+     * Count elements of an object
+     *
+     * @return int Number of unique chunks
+     */
+    public function count()
+    {
+        return count($this->entries);
+    }
+    
+    protected function pagePath()
+    {
+        if (! $this->timestamp) {
+            throw new Exception('pagePath(): timestamp not set');
+        }
+        
+        return $this->notebook->getPath($this->timestamp.'.csv');
+    }
+    
+    protected function pageNotesPath()
+    {
+        if (! $this->timestamp) {
+            throw new Exception('pagePath(): timestamp not set');
+        }
+        
+        return $this->notebook->getPath($this->timestamp.'.notes.txt');
     }
 }
