@@ -26,4 +26,4 @@ When using Search, each entry keeps track keeps track of what constraints were p
 ## How to use
 To get started, you must extend the Notebook class and implement directoryLocation() function, returning a filepath to the directory you want to use as a notebook.
 
-*To be continue...*
+*To be continue*
