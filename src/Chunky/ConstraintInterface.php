@@ -8,19 +8,19 @@ abstract class ConstraintInterface
      * @var \ColbyGatte\Chunky\Page
      */
     protected $page;
-    
+
     /**
      * @var \ColbyGatte\Chunky\Entry
      */
     protected $entry;
-    
+
     /**
      * Used in @see ConstraintInterface::tagIsEqual()
      *
      * @var bool
      */
     protected $strictComparison = false;
-    
+
     /**
      * Called before the test is ran.
      *
@@ -30,7 +30,7 @@ abstract class ConstraintInterface
     {
         $this->page = $page;
     }
-    
+
     /**
      * @param \ColbyGatte\Chunky\Entry $entry
      */
@@ -38,10 +38,10 @@ abstract class ConstraintInterface
     {
         $this->entry = $entry;
     }
-    
+
     /**
-     * @param $tag
-     * @param $value
+     * @param      $tag
+     * @param      $value
      * @param bool $strictComparison Will override the class-value strictComparison for this test only.
      *
      * @return bool
@@ -49,14 +49,14 @@ abstract class ConstraintInterface
     public function tagIsEqual($tag, $value, $strictComparison = null)
     {
         $strictComparison = $strictComparison ?: $this->strictComparison;
-        
+
         if ($actualValue = $this->entry->getTag($tag)) {
             return $strictComparison ? $value === $actualValue : $value == $actualValue;
         }
-        
+
         return false;
     }
-    
+
     /**
      * @param string $tag
      * @param string $regex
@@ -67,7 +67,7 @@ abstract class ConstraintInterface
     {
         return ($value = $this->entry->getTag($tag)) && preg_match($regex, $value);
     }
-    
+
     /**
      * @param int $timestamp
      *
@@ -77,12 +77,12 @@ abstract class ConstraintInterface
     {
         return $this->entry->getTimestamp() < $timestamp;
     }
-    
+
     /**
      * @return bool
      */
     abstract public function passesTest();
-    
+
     /**
      * Optional identifying term for the constraint. Defaults to the full class name.
      *

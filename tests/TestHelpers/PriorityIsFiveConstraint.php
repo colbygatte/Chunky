@@ -15,7 +15,7 @@ class PriorityIsFiveConstraint extends ConstraintInterface
     {
         return $this->tagIsEqual('priority', 5);
     }
-    
+
     public function shortName()
     {
         return 'priority';

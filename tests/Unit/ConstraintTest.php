@@ -14,17 +14,17 @@ class ConstraintTest extends TestCase
         $resultEntries = (new BlueChunkSearch)->searchOn(
             (new SignUpsNotebook)->loadAllEntries()
         );
-        
+
         $this->assertCount(41, $resultEntries->getEntries());
     }
-    
+
     /** @test */
     public function search_reports_are_accurate()
     {
         $pageResult = (new BlueChunkSearch)->searchOn(
             (new SignUpsNotebook)->loadAllEntries()
         );
-        
+
         $this->assertEquals(
             [
                 [

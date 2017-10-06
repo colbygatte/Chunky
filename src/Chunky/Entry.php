@@ -8,39 +8,39 @@ namespace ColbyGatte\Chunky;
 class Entry
 {
     use GetHelper;
-    
+
     /**
      * @var string
      */
     protected $chunk;
-    
+
     /**
      * @var array
      */
     protected $tags = [];
-    
+
     /**
      * @var \ColbyGatte\Chunky\Page
      */
     protected $page;
-    
+
     /**
      * @var string Timestamp
      */
     protected $timestamp;
-    
+
     /**
      * @var \ColbyGatte\Chunky\SearchReport[]
      */
     protected $searchReports = [];
-    
+
     /**
      * Chunk constructor.
      */
     public function __construct()
     {
     }
-    
+
     /**
      * @return string
      */
@@ -48,7 +48,7 @@ class Entry
     {
         return $this->chunk;
     }
-    
+
     /**
      * @param string $chunk
      *
@@ -57,14 +57,14 @@ class Entry
     public function setChunk($chunk)
     {
         $this->chunk = $chunk;
-        
+
         return $this;
     }
-    
+
     /**
      * Tags are ONLY set from here to ensure future changes can be made seamlessly.
      *
-     * @param $tag
+     * @param      $tag
      * @param null $value
      *
      * @return $this
@@ -77,29 +77,37 @@ class Entry
             }
         } else {
             $tag = preg_replace('/[^\w0-9\-]/', '', strtolower($tag));
-            
+
             $value = preg_replace('/[^\w0-9\-%#@\.\h]/', '', $value);
-            
+
             $this->emitTagInfo($tag, $value);
-            
+
             $this->tags[$tag] = $value;
         }
-        
+
         return $this;
     }
-    
-    public function setTimestamp($timestamp)
-    {
-        $this->timestamp = $timestamp;
-        
-        return $this;
-    }
-    
+
+    /**
+     * @return string
+     */
     public function getTimestamp()
     {
         return $this->timestamp;
     }
-    
+
+    /**
+     * @param int|string $timestamp
+     *
+     * @return $this
+     */
+    public function setTimestamp($timestamp)
+    {
+        $this->timestamp = $timestamp;
+
+        return $this;
+    }
+
     public function toArray()
     {
         return [
@@ -107,23 +115,34 @@ class Entry
             $this->getHelper()->tagsToString($this->tags)
         ];
     }
-    
+
+    /**
+     * Checks if a tag is equal to the given value.
+     *
+     * @param $tag
+     * @param $equalTo
+     *
+     * @return bool
+     */
     public function isTagEqual($tag, $equalTo)
     {
         $tagValue = $this->getTag($tag);
-        
+
         if ($tagValue === false) {
             return false;
         }
-        
+
         return $tagValue == $equalTo;
     }
-    
+
+    /**
+     * @return array
+     */
     public function getTags()
     {
         return $this->tags;
     }
-    
+
     /**
      * Tags are ONLY retrieved from this function to ensure future changes can be made seamlessly.
      *
@@ -135,7 +154,7 @@ class Entry
     {
         return isset($this->tags[$tag]) ? $this->tags[$tag] : false;
     }
-    
+
     /**
      * @return \ColbyGatte\Chunky\SearchReport
      */
@@ -143,14 +162,17 @@ class Entry
     {
         return end($this->searchReports);
     }
-    
+
+    /**
+     * @return \ColbyGatte\Chunky\SearchReport
+     */
     public function newSearchReport()
     {
         $this->searchReports[] = $searchReport = new SearchReport;
-        
+
         return $searchReport;
     }
-    
+
     /**
      * Called any time a tag is set.
      *

@@ -16,17 +16,17 @@ class NotesOnPage extends TestCase
             (new SignUpsNotebook)->loadPage(1500077642)->loadNotes()
         );
     }
-    
+
     /** @test */
     public function can_write_notes_on_page()
     {
         $notebook = new TestWriteNotebook;
-        
+
         $page = $notebook->newPage();
         $page->addNote('hello');
         $page->addNote('hi');
         $page->writeNotes();
-        
+
         $this->assertEquals(
             $notebook->loadPage($page->getTimestamp())->loadNotes(),
             ['hello', 'hi']
